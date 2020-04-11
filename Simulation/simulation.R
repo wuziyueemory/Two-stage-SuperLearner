@@ -190,7 +190,7 @@ if(job_control == "merge"){
   
   # MSE
 	mse_result <- matrix(NA, nrow = nrow(parameter_grid), ncol = algo.num)
-	for(i in c(1:336,338:nrow(parameter_grid))){
+	for(i in c(1:nrow(parameter_grid))){
 		tmp <- get(load(paste0("/home/zwu56/sim/scratch/MSE_n=",parameter_grid$sample_size[i],
 		                       "_zero=",parameter_grid$zero_inflate[i],
 		                       "_nonzero=",parameter_grid$dist[i],
@@ -204,7 +204,7 @@ if(job_control == "merge"){
 	
 	# MAE
 	mae_result <- matrix(NA, nrow = nrow(parameter_grid), ncol = algo.num)
-	for(i in c(1:336,338:nrow(parameter_grid))){
+	for(i in c(1:nrow(parameter_grid))){
 	  tmp <- get(load(paste0("/home/zwu56/sim/scratch/MAE_n=",parameter_grid$sample_size[i],
 	                         "_zero=",parameter_grid$zero_inflate[i],
 	                         "_nonzero=",parameter_grid$dist[i],
@@ -218,7 +218,7 @@ if(job_control == "merge"){
 	
 	# R square
 	Rsq_result <- matrix(NA, nrow = nrow(parameter_grid), ncol = algo.num)
-	for(i in c(1:336,338:nrow(parameter_grid))){
+	for(i in c(1:nrow(parameter_grid))){
 	  tmp <- get(load(paste0("/home/zwu56/sim/scratch/Rsq_n=",parameter_grid$sample_size[i],
 	                         "_zero=",parameter_grid$zero_inflate[i],
 	                         "_nonzero=",parameter_grid$dist[i],
