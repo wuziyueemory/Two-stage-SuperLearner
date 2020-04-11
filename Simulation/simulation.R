@@ -24,7 +24,9 @@ parameter_grid <- expand.grid(
 )
 
 # source in functions 
-source(/home/zwu56/sim/createData.R")
+source(/home/zwu56/sim/twostageSL.R)
+source(/home/zwu56/sim/createData.R)
+source(/home/zwu56/sim/Estimators.R)
 
 # execute job ##################
 if(job_control == "run"){
