@@ -16,6 +16,7 @@ rlnormgammamix <- function(n,prob,shape,mu) {
          exp(mu + rnorm(n,0,0.2)))
 }
 
+# Functions for generating simulation data
 createData <- function(n,zero,nonzero,linear,interaction){
   # generate covariates (10)
   # w1 & w6 have bernoulli distribution
