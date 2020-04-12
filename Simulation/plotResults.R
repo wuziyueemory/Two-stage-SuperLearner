@@ -292,9 +292,8 @@ bp.3 + coord_flip()
 #=======================================================================================#
 # Plot results - Sub-Boxplots grouped by 3 different data generating parameters
 #=======================================================================================#
-
-# Boxplot - small sample size (n=500)
 # Raw MSE
+# Boxplot - small sample size (n=500)
 mse.small <- mse.rank.reorder[mse.rank.reorder$sample_size==500,c(6:46)]
 # Add average MSE row 
 mse.small <- rbind(mse.small,apply(mse.small,2,mean))
@@ -327,11 +326,9 @@ bp.500 <- ggplot(mse_small, aes(x=Algorithm, y=MSE))+
         panel.background = element_blank(),
         # Add axis line
         axis.line = element_line(colour = "grey"))
-# Horizontal box plot
 bp.500 <- bp.500 + coord_flip()
 
 # Boxplot - large sample size (n=2000)
-# Raw MSE
 mse.large <- mse.rank.reorder[mse.rank.reorder$sample_size==2000,c(6:46)]
 # Add average MSE row 
 mse.large <- rbind(mse.large,apply(mse.large,2,mean))
@@ -364,14 +361,12 @@ bp.2000 <- ggplot(mse_large, aes(x=Algorithm, y=MSE))+
         panel.background = element_blank(),
         # Add axis line
         axis.line = element_line(colour = "grey"))
-# Horizontal box plot
 bp.2000 <- bp.2000 + coord_flip()
 
 library(gridExtra)
 grid.arrange(bp.500, bp.2000, ncol=2)
 
 # Boxplot - low zero percent (5%)
-# Raw MSE
 mse.low <- mse.rank.reorder[mse.rank.reorder$zero_inflate==0.05,c(6:46)]
 # Add average MSE row 
 mse.low <- rbind(mse.low,apply(mse.low,2,mean))
@@ -404,11 +399,9 @@ bp.low <- ggplot(mse_low, aes(x=Algorithm, y=MSE))+
         panel.background = element_blank(),
         # Add axis line
         axis.line = element_line(colour = "grey"))
-# Horizontal box plot
 bp.low <- bp.low + coord_flip()
 
 # Boxplot - high zero percentage (n=70%)
-# Raw MSE
 mse.high <- mse.rank.reorder[mse.rank.reorder==0.7,c(6:46)]
 # Add average MSE row 
 mse.high <- rbind(mse.high,apply(mse.high,2,mean))
@@ -427,7 +420,6 @@ mse_high <- data.frame(
   MSE = q.high
 )
 
-# Box plot
 bp.high <- ggplot(mse_high, aes(x=Algorithm, y=MSE))+
   geom_boxplot()+
   ggtitle("(d) MSE - 70% zero")+
@@ -442,14 +434,12 @@ bp.high <- ggplot(mse_high, aes(x=Algorithm, y=MSE))+
         panel.background = element_blank(),
         # Add axis line
         axis.line = element_line(colour = "grey"))
-# Horizontal box plot
 bp.high <- bp.high + coord_flip()
 
 library(gridExtra)
 grid.arrange(bp.low, bp.high, ncol=2)
 
 # Boxplot - lognormal
-# Raw MSE
 mse.lognormal <- mse.rank.reorder[mse.rank.reorder$dist=="lognormal",c(6:46)]
 # Add average MSE row 
 mse.lognormal <- rbind(mse.lognormal,apply(mse.lognormal,2,mean))
@@ -484,11 +474,9 @@ bp.lognormal <- ggplot(mse_lognormal.subset, aes(x=Algorithm, y=MSE))+
         panel.background = element_blank(),
         # Add axis line
         axis.line = element_line(colour = "grey"))
-# Horizontal box plot
 bp.lognormal <- bp.lognormal + coord_flip()
 
 # Boxplot - gamma
-# Raw MSE
 mse.gamma <- mse.rank.reorder[mse.rank.reorder$dist=="gamma",c(6:46)]
 # Add average MSE row 
 mse.gamma <- rbind(mse.gamma,apply(mse.gamma,2,mean))
@@ -523,11 +511,9 @@ bp.gamma <- ggplot(mse_gamma.subset, aes(x=Algorithm, y=MSE))+
         panel.background = element_blank(),
         # Add axis line
         axis.line = element_line(colour = "grey"))
-# Horizontal box plot
 bp.gamma <- bp.gamma + coord_flip()
 
 # Boxplot - Tweedie
-# Raw MSE
 mse.tweedie <- mse.rank.reorder[mse.rank.reorder$dist=="tweedie",c(6:46)]
 # Add average MSE row 
 mse.tweedie <- rbind(mse.tweedie,apply(mse.tweedie,2,mean))
@@ -548,7 +534,6 @@ mse_tweedie <- data.frame(
 # restrict to top 10 algorithm + tweedie
 mse_tweedie.subset <- mse_tweedie[c(1:80,137:144),]
 
-# Box plot
 bp.tweedie <- ggplot(mse_tweedie.subset, aes(x=Algorithm, y=MSE))+
   geom_boxplot()+
   ggtitle("(c) MSE - Tweedie")+
@@ -563,11 +548,9 @@ bp.tweedie <- ggplot(mse_tweedie.subset, aes(x=Algorithm, y=MSE))+
         panel.background = element_blank(),
         # Add axis line
         axis.line = element_line(colour = "grey"))
-# Horizontal box plot
 bp.tweedie <- bp.tweedie + coord_flip()
 
 # Boxplot - mixture
-# Raw MSE
 mse.mixture <- mse.rank.reorder[mse.rank.reorder$dist=="mixture",c(6:46)]
 # Add average MSE row 
 mse.mixture <- rbind(mse.mixture,apply(mse.mixture,2,mean))
@@ -602,7 +585,6 @@ bp.mixture <- ggplot(mse_mixture.subset, aes(x=Algorithm, y=MSE))+
         panel.background = element_blank(),
         # Add axis line
         axis.line = element_line(colour = "grey"))
-# Horizontal box plot
 bp.mixture <- bp.mixture + coord_flip()
 
 library(gridExtra)
