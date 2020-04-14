@@ -264,7 +264,7 @@ twostageSL <- function(Y, X, newX = NULL, library.2stage, library.1stage,twostag
   # ensure each folds have approximately equal number of obs with y=0
   V <- cvControl$V
   ord <- order(Y)
-  cvfold <- rep(c(1:V),N)[1:N]
+  cvfold <- rep(c(1:V,V:1),N)[1:N]
   folds <- split(ord, factor(cvfold))
   # check
   tab <- rep(NA,V)
