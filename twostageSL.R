@@ -428,7 +428,7 @@ twostageSL <- function(Y, X, newX = NULL, library.2stage, library.1stage,twostag
   # step 3: fit the whole model using one stage option (rather than two stages)
   # list all the algorithms considered
   # save cross-validated fits (10) in the control option
-  onestage.fit <- SuperLearner(Y=Y,X=X,family=family.single, 
+  onestage.fit <- SuperLearner(Y=Y,X=X,newX=newX,family=family.single, 
                                SL.library=library.1stage,verbose=verbose,
                                method=method.CC_LS.scale,
                                control=list(saveCVFitLibrary=T),
