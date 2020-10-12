@@ -2,11 +2,11 @@
 Two-stage SuperLearner 
 ############################################
 library(SuperLearner)
-
-
-# function for generating weights (coefficients) in two-stage superlearner: scaled quadratic programming
+# two stage super-learner
+#################### With screening algorithm ################################################
+# function for generating weights (coefficients): scaled quadratic programming
 method.CC_LS.scale <- function() {
-  computeCoef = function(Z, Y, libraryNames, verbose, 
+  computeCoef = function(Z, Y, libraryNames, verbose,
                          obsWeights=rep(1, length(Y)),
                          errorsInLibrary = NULL, ...) {
     # compute cvRisk
@@ -27,6 +27,10 @@ method.CC_LS.scale <- function() {
       invisible(fit)
     }
     modZ <- Z
+    # check for columns of all zeros. assume these correspond
+    # to errors that SuperLearner sets equal to 0. not a robust
+    # solution, since in theory an algorithm could predict 0 for
+    # all observations (e.g., SL.mean when all Y in training = 0)
     naCols <- which(apply(Z, 2, function(z){ all(z == 0 ) }))
     anyNACols <- length(naCols) > 0
     if(anyNACols){
@@ -38,10 +42,10 @@ method.CC_LS.scale <- function() {
     # set a tolerance level to avoid numerical instability
     tol <- 8
     dupCols <- which(duplicated(round(Z, tol), MARGIN = 2))
-    anyDupCols <- length(dupCols) > 0 
+    anyDupCols <- length(dupCols) > 0
     if(anyDupCols){
       # if present, throw warning identifying learners
-      warning(paste0(paste0(libraryNames[dupCols],collapse = ", "), 
+      warning(paste0(paste0(libraryNames[dupCols],collapse = ", "),
                      " are duplicates of previous learners.",
                      " Removing from super learner."))
     }
@@ -77,13 +81,13 @@ method.CC_LS.scale <- function() {
               computeCoef = computeCoef,
               computePred = computePred)
   invisible(out)
-}  
+}
 
-
-######################## Two-Stage SuperLearner ##########################
+## Two-Stage SuperLearner
+##############################################################################################
 
 twostageSL <- function(Y, X, newX = NULL, library.2stage, library.1stage,twostage,
-                       family.1, family.2, family.single, method="method.CC_LS", 
+                       family.1, family.2, family.single, method="method.CC_LS",
                        id=NULL, verbose=FALSE, control = list(), cvControl = list(),
                        obsWeights = NULL, env = parent.frame()){
   
@@ -122,11 +126,11 @@ twostageSL <- function(Y, X, newX = NULL, library.2stage, library.1stage,twostag
   library.stage_1 <- SuperLearner:::.createLibrary(library.stage1)
   library.stage_2 <- SuperLearner:::.createLibrary(library.stage2)
   library.stage_single <- SuperLearner:::.createLibrary(library.1stage)
-  SuperLearner:::.check.SL.library(library = c(unique(library.stage_1$library$predAlgorithm), 
+  SuperLearner:::.check.SL.library(library = c(unique(library.stage_1$library$predAlgorithm),
                                                library.stage_1$screenAlgorithm))
-  SuperLearner:::.check.SL.library(library = c(unique(library.stage_2$library$predAlgorithm), 
+  SuperLearner:::.check.SL.library(library = c(unique(library.stage_2$library$predAlgorithm),
                                                library.stage_2$screenAlgorithm))
-  SuperLearner:::.check.SL.library(library = c(unique(library.stage_single$library$predAlgorithm), 
+  SuperLearner:::.check.SL.library(library = c(unique(library.stage_single$library$predAlgorithm),
                                                library.stage_single$screenAlgorithm))
   call <- match.call(expand.dots = TRUE)
   
@@ -233,7 +237,7 @@ twostageSL <- function(Y, X, newX = NULL, library.2stage, library.1stage,twostag
                                                         "+ S2:",libname.stage.2),
                                   "rowScreen.Stage.1"=rep(library.stage_1$library$rowScreen,each=k.2),
                                   "rowScreen.Stage.2"=rep(library.stage_2$library$rowScreen,k.1)),
-              singestage=library.stage_single$library)
+              singlestage=library.stage_single$library)
   library <- list("library"=lib,
                   "screenAlgorithm"=list(stage.1 = library.stage_1$screenAlgorithm,
                                          stage.2 = library.stage_2$screenAlgorithm,
@@ -266,6 +270,7 @@ twostageSL <- function(Y, X, newX = NULL, library.2stage, library.1stage,twostag
   ord <- order(Y)
   cvfold <- rep(c(1:V,V:1),N)[1:N]
   folds <- split(ord, factor(cvfold))
+  folds <- lapply(folds,sort,decreasing=FALSE)
   # check
   tab <- rep(NA,V)
   for (i in 1:V) {
@@ -296,7 +301,7 @@ twostageSL <- function(Y, X, newX = NULL, library.2stage, library.1stage,twostag
   
   # list all the algorithms considered
   # save cross-validated fits (10) in the control option
-  step1.fit <- SuperLearner(Y=as.numeric(Y==0),X=X,family=family.1, 
+  step1.fit <- SuperLearner(Y=as.numeric(Y==0),X=X,family=family.1,
                             SL.library=library.stage1,verbose=verbose,
                             method=method.CC_nloglik,
                             control=list(saveCVFitLibrary=T),
@@ -304,14 +309,14 @@ twostageSL <- function(Y, X, newX = NULL, library.2stage, library.1stage,twostag
   # get the cross-validated predicted values for each algorithm in SL.library
   # P(Y=0|X)
   z1 <- step1.fit$Z
-  # get the cross-validated fits (10 fits for 10 training set) for each algorithm 
+  # get the cross-validated fits (10 fits for 10 training set) for each algorithm
   stage1.cvFitLibrary <- step1.fit$cvFitLibrary
   
   
   ##########################################################################################################
   # step 2: fit model for E[Y|Y>0,X]
   # create function for the cross-validation step at stage 2:
-  .crossValFUN <- function(valid, Y, dataX, predX, id, obsWeights, library, family, 
+  .crossValFUN <- function(valid, Y, dataX, predX, id, obsWeights, library, family,
                            kScreen, k, p, libraryNames, saveCVFitLibrary) {
     tempLearn <- dataX[-valid, , drop = FALSE]
     tempOutcome <- Y[-valid]
@@ -320,15 +325,23 @@ twostageSL <- function(Y, X, newX = NULL, library.2stage, library.1stage,twostag
     tempId <- id[-valid]
     tempObsWeights <- obsWeights[-valid]
     
+    # create subset with only obs y>0
+    pid <- row.names(tempLearn)
+    dat.p <- cbind(pid,tempLearn,tempOutcome)
+    tempOutcome.p <- tempOutcome[tempOutcome>0]
+    tempLearn.p <- dat.p[dat.p$tempOutcome>0,-c(1,ncol(dat.p))]
+    tempId.p <- dat.p[dat.p$tempOutcome>0,1]
+    tempObsWeights.p <- obsWeights[tempId.p]
+    
     # should this be converted to a lapply also?
     for(s in seq(kScreen)) {
       screen_fn = get(library$screenAlgorithm[s], envir = env)
-      testScreen <- try(do.call(screen_fn, 
-                                list(Y = tempOutcome, 
-                                     X = tempLearn, 
-                                     family = family, 
-                                     id = tempId, 
-                                     obsWeights = tempObsWeights)))
+      testScreen <- try(do.call(screen_fn,
+                                list(Y = tempOutcome.p,
+                                     X = tempLearn.p,
+                                     family = family,
+                                     id = tempId.p,
+                                     obsWeights = tempObsWeights.p)))
       if(inherits(testScreen, "try-error")) {
         warning(paste("replacing failed screening algorithm,", library$screenAlgorithm[s], ", with All()", "\n "))
         tempWhichScreen[s, ] <- TRUE
@@ -350,17 +363,17 @@ twostageSL <- function(Y, X, newX = NULL, library.2stage, library.1stage,twostag
     
     for(s in seq(k)) {
       pred_fn = get(library$library$predAlgorithm[s], envir = env)
-      testAlg <- try(do.call(pred_fn, 
-                             list(Y = tempOutcome, 
-                                  X = subset(tempLearn, 
-                                             select = tempWhichScreen[library$library$rowScreen[s], ], 
-                                             drop=FALSE), 
-                                  newX = subset(tempValid, 
-                                                select = tempWhichScreen[library$library$rowScreen[s], ], 
-                                                drop=FALSE), 
-                                  family = family, 
-                                  id = tempId, 
-                                  obsWeights = tempObsWeights)))
+      testAlg <- try(do.call(pred_fn,
+                             list(Y = tempOutcome.p,
+                                  X = subset(tempLearn.p,
+                                             select = tempWhichScreen[library$library$rowScreen[s], ],
+                                             drop=FALSE),
+                                  newX = subset(tempValid,
+                                                select = tempWhichScreen[library$library$rowScreen[s], ],
+                                                drop=FALSE),
+                                  family = family,
+                                  id = tempId.p,
+                                  obsWeights = tempObsWeights.p)))
       if(inherits(testAlg, "try-error")) {
         warning(paste("Error in algorithm", library$library$predAlgorithm[s], "\n  The Algorithm will be removed from the Super Learner (i.e. given weight 0) \n" ))
         # errorsInCVLibrary[s] <<- 1
@@ -383,27 +396,17 @@ twostageSL <- function(Y, X, newX = NULL, library.2stage, library.1stage,twostag
   # rbind unlists the output from lapply
   # need to unlist folds to put the rows back in the correct order
   
-  # create subset with only obs y>0
-  pid <- c(1:N)
-  dat.p <- cbind(pid,X,Y)
-  Y.p <- Y[Y>0]
-  X.p <- dat.p[dat.p$Y>0,-c(1,ncol(dat.p))]
-  X.test <- dat.p[,-c(1,ncol(dat.p))]
-  p.id <- dat.p[dat.p$Y>0,1]
-  p.obsWeights <- obsWeights[p.id]
-  
-  crossValFUN_out <- lapply(folds, FUN = .crossValFUN, 
-                            Y = Y.p, dataX = X.p, predX = X.test, id = p.id, 
-                            obsWeights = p.obsWeights, family = family.2,
-                            library = library.stage_2, kScreen = kScreen.2, 
+  crossValFUN_out <- lapply(folds, FUN = .crossValFUN,
+                            Y = Y, dataX = X, predX = X, id = id,
+                            obsWeights = obsWeights, family = family.2,
+                            library = library.stage_2, kScreen = kScreen.2,
                             k = k.2, p = p, libraryNames = library.stage_2$library$predAlgorithm,
                             saveCVFitLibrary = control$saveCVFitLibrary)
   
   # create matrix to store results
   z2 <- matrix(NA,nrow = N,ncol=k.2)
-  
   z2[unlist(folds, use.names = FALSE), ] <- do.call('rbind', lapply(crossValFUN_out, "[[", "out"))
-  
+
   if(control$saveCVFitLibrary){
     stage2.cvFitLibrary <- lapply(crossValFUN_out, "[[", "model_out")
   }else{
@@ -412,7 +415,7 @@ twostageSL <- function(Y, X, newX = NULL, library.2stage, library.1stage,twostag
   
   # z1 for E[P(Y=0|X)]
   # z2 for E[Y|Y>0,X]
-  # multiply (1-z1)*z2 to generate z 
+  # multiply (1-z1)*z2 to generate z
   z <- NULL
   for (i in 1:k.1){
     for (j in 1:k.2){
@@ -428,14 +431,14 @@ twostageSL <- function(Y, X, newX = NULL, library.2stage, library.1stage,twostag
   # step 3: fit the whole model using one stage option (rather than two stages)
   # list all the algorithms considered
   # save cross-validated fits (10) in the control option
-  onestage.fit <- SuperLearner(Y=Y,X=X,newX=newX,family=family.single, 
+  onestage.fit <- SuperLearner(Y=Y,X=X,family=family.single,
                                SL.library=library.1stage,verbose=verbose,
                                method=method.CC_LS.scale,
                                control=list(saveCVFitLibrary=T),
                                cvControl=cvControl)
   # get the cross-validated predicted values for each algorithm in SL.library
   z.single <- onestage.fit$Z
-  # get the cross-validated fits (10 fits for 10 training set) for each algorithm 
+  # get the cross-validated fits (10 fits for 10 training set) for each algorithm
   single.stage.cvFitLibrary <- onestage.fit$cvFitLibrary
   
   # combine 2 stages output z with 1 stage prediction output z
@@ -485,18 +488,18 @@ twostageSL <- function(Y, X, newX = NULL, library.2stage, library.1stage,twostag
   time_predict_start = proc.time()
   
   # stage 1
-  whichScreen.stage1 <- sapply(library$screenAlgorithm$stage.1, FUN = .screenFun, 
-                               list = list(Y = Y, X = X, family = family, id = id, obsWeights = NULL), 
+  whichScreen.stage1 <- sapply(library$screenAlgorithm$stage.1, FUN = .screenFun,
+                               list = list(Y = Y, X = X, family = family, id = id, obsWeights = NULL),
                                simplify = FALSE)
   whichScreen.stage1 <- do.call(rbind, whichScreen.stage1)
   # stage 2
-  whichScreen.stage2 <- sapply(library$screenAlgorithm$stage.2, FUN = .screenFun, 
-                               list = list(Y = Y, X = X, family = family, id = id, obsWeights = NULL), 
+  whichScreen.stage2 <- sapply(library$screenAlgorithm$stage.2, FUN = .screenFun,
+                               list = list(Y = Y, X = X, family = family, id = id, obsWeights = NULL),
                                simplify = FALSE)
   whichScreen.stage2 <- do.call(rbind, whichScreen.stage2)
   # single stage
-  whichScreen.stage.single <- sapply(library$screenAlgorithm$stage.single, FUN = .screenFun, 
-                                     list = list(Y = Y, X = X, family = family, id = id, obsWeights = NULL), 
+  whichScreen.stage.single <- sapply(library$screenAlgorithm$stage.single, FUN = .screenFun,
+                                     list = list(Y = Y, X = X, family = family, id = id, obsWeights = NULL),
                                      simplify = FALSE)
   whichScreen.stage.single <- do.call(rbind, whichScreen.stage.single)
   # combine together
@@ -505,7 +508,7 @@ twostageSL <- function(Y, X, newX = NULL, library.2stage, library.1stage,twostag
                       single.stage = whichScreen.stage.single)
   
   # Prediction for each algorithm
-  .predFun <- function(index, lib, Y, dataX, newX, whichScreen, family, id, obsWeights, 
+  .predFun <- function(index, lib, Y, dataX, newX, whichScreen, family, id, obsWeights,
                        verbose, control, libraryNames) {
     pred_fn = get(lib$predAlgorithm[index], envir = env)
     testAlg <- try(do.call(pred_fn, list(Y = Y,
@@ -553,6 +556,14 @@ twostageSL <- function(Y, X, newX = NULL, library.2stage, library.1stage,twostag
   assign('libraryNames', library.stage_2$library$predAlgorithm, envir = fitLibEnv)
   evalq(names(fitLibrary) <- library.stage_2$library$predAlgorithm, envir = fitLibEnv)
   # get prediction for stage 2
+  # create subset with only obs y>0
+  pid <- c(1:N)
+  dat.p <- cbind(pid,X,Y)
+  Y.p <- Y[Y>0]
+  X.p <- dat.p[dat.p$Y>0,-c(1,ncol(dat.p))]
+  p.id <- dat.p[dat.p$Y>0,1]
+  p.obsWeights <- obsWeights[p.id]
+  
   predY.stage2 <- do.call('cbind', lapply(seq(k.2), FUN = .predFun,
                                           lib = library.stage_2$library, Y = Y.p, dataX = X.p,
                                           newX = newX, whichScreen = whichScreen$stage2,
@@ -569,7 +580,7 @@ twostageSL <- function(Y, X, newX = NULL, library.2stage, library.1stage,twostag
   assign('fitLibrary', vector('list', length = k.single), envir = fitLibEnv)
   assign('libraryNames', library.stage_single$library$predAlgorithm, envir = fitLibEnv)
   evalq(names(fitLibrary) <- library.stage_single$library$predAlgorithm, envir = fitLibEnv)
-  # save fit library for single stage 
+  # save fit library for single stage
   predY.stage.single <- do.call('cbind', lapply(seq(k.single), FUN = .predFun,
                                                 lib = library.stage_single$library, Y = Y, dataX = X,
                                                 newX = newX, whichScreen = whichScreen$single.stage,
