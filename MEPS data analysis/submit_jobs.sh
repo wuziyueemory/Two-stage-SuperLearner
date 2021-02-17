@@ -8,4 +8,4 @@
 #$ -e MEPS.err
 #$ -q short.q
 
-R --vanilla  < /home/zwu56/real/MEPS.R
+R --vanilla  < /home/zwu56/MEPS/MEPS.R
