@@ -31,9 +31,9 @@ source("/home/zwu56/MEPS/Estimators.R")
 
 # Loading MEPS train_data
 # train
-train <- read.csv("/home/zwu56/MEPS/train")
+train <- read.csv("/home/zwu56/MEPS/train.csv")
 # test
-test <- read.csv("/home/zwu56/MEPS/test")
+test <- read.csv("/home/zwu56/MEPS/test.csv")
 
 #==================================================================================#
 # Fit two stage Super Learner
