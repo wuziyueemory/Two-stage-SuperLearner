@@ -4,7 +4,7 @@
 
 #$ -M zwu56@emory.edu
 #$ -o MEPS.log
-#$ -N real
+#$ -N MEPS
 #$ -e MEPS.err
 #$ -q short.q
 
