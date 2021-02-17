@@ -2,18 +2,18 @@
 
 
 # This file was used to submit the simulation files to a cluster system.
-# Using the subjobs_loop.sh shell script one can submit each simulation 
+# Using the submit_jobs.sh shell script one can submit each simulation 
 # in sequence. First, the created simulated data files are analyzed in 
 # the 'run' execution. Then the results are collated in the 'merge' 
 # execution
 
-# get environment variables
+## get environment variables
 myscratch <- Sys.getenv('myscratch')
 resultdir <- Sys.getenv('resultdir')
 job_control <- Sys.getenv("job_control")
 iter <- as.numeric(Sys.getenv("iter"))
 
-# simulation parameters
+## simulation parameters
 parameter_grid <- expand.grid(
   seed = 1:1000,
   zero_inflate = c(0.05, 0.7),
@@ -28,7 +28,7 @@ source(/home/zwu56/sim/twostageSL.R)
 source(/home/zwu56/sim/createData.R)
 source(/home/zwu56/sim/Estimators.R)
 
-# execute job ##################
+#################### execute job #######################
 if(job_control == "run"){
 
   # do your simulation for row iter of parameter_grid
@@ -49,7 +49,7 @@ if(job_control == "run"){
                         linear = parameter_grid$linear[iter]
     )
 
-    # load libraries
+    ## load libraries
     library(mgcv)
     library(quadprog)
     library(SuperLearner)
@@ -69,7 +69,7 @@ if(job_control == "run"){
     library(sandwich)
     library(glmnet)
     
-    # fit two-stage superlearner    
+    ## fit two-stage superlearner    
     twostage.fit <- twostageSL(Y = train$y, X = train[,-c(1,12)], newX = test[,-c(1,12)],
                                library.2stage = list(stage1=c("SL.glm","SL.rf.caret1","SL.glmnet"),
                                                      stage2=c("SL.logOLS.smear","SL.gammaLogGLM",
@@ -86,7 +86,7 @@ if(job_control == "run"){
                                family.single = gaussian,
                                cvControl = list(V = 5))
     
-    # construct one-stage superlearner
+    ###################### construct one-stage superlearner #######################
     # extract onestage matrix z1
     z1 <- twostage.fit$Z[,31:38]
     onestagename <- colnames(twostage.fit$library.predict[,31:38])
@@ -103,7 +103,7 @@ if(job_control == "run"){
     # get discrete two-stage superlearner
     discrete.pred <- twostage.fit$library.predict[,which.min(twostage.fit$cvRisk)]
     
-    ## get prediction performance
+    ########################## get prediction metrics ########################
     # MSE
     mse <- c(apply(twostage.fit$library.predict, 2, function(x) mean((test$y-x)^2)),
              mean((test$y - onestage.pred)^2),
@@ -119,7 +119,7 @@ if(job_control == "run"){
     # R sqaure
     Rsq <-  1 - mse/var(test$y)
     
-    # save output
+    ######################### save output ###########################
     save(mse, file=paste0("/home/zwu56/sim/scratch/MSE_n=",parameter_grid$sample_size[iter],
                           "_zero=",parameter_grid$zero_inflate[iter],
                           "_nonzero=",parameter_grid$dist[iter],
@@ -143,7 +143,7 @@ if(job_control == "run"){
     }
 
 
-# merge job ########################### 
+############################## merge job ################################### 
 if(job_control == "merge"){
   
   # algorithm name
@@ -190,7 +190,7 @@ if(job_control == "merge"){
                   "Discrete SuperLearner")
   algo.num <- length(algo.name)
   
-  # MSE
+  ## MSE
 	mse_result <- matrix(NA, nrow = nrow(parameter_grid), ncol = algo.num)
 	for(i in c(1:nrow(parameter_grid))){
 		tmp <- get(load(paste0("/home/zwu56/sim/scratch/MSE_n=",parameter_grid$sample_size[i],
@@ -204,7 +204,7 @@ if(job_control == "merge"){
 	mse_result <- cbind(parameter_grid,mse_result)
 	colnames(mse_result)[7:47] <- algo.name
 	
-	# MAE
+  ## MAE
 	mae_result <- matrix(NA, nrow = nrow(parameter_grid), ncol = algo.num)
 	for(i in c(1:nrow(parameter_grid))){
 	  tmp <- get(load(paste0("/home/zwu56/sim/scratch/MAE_n=",parameter_grid$sample_size[i],
@@ -218,7 +218,7 @@ if(job_control == "merge"){
 	mae_result <- cbind(parameter_grid,mae_result)
 	colnames(mae_result)[7:47] <- algo.name
 	
-	# R square
+  ## R square
 	Rsq_result <- matrix(NA, nrow = nrow(parameter_grid), ncol = algo.num)
 	for(i in c(1:nrow(parameter_grid))){
 	  tmp <- get(load(paste0("/home/zwu56/sim/scratch/Rsq_n=",parameter_grid$sample_size[i],
@@ -232,7 +232,7 @@ if(job_control == "merge"){
 	Rsq_result <- cbind(parameter_grid,Rsq_result)
 	colnames(Rsq_result)[7:47] <- algo.name
 	
-	# save result object
+  ## save result object
 	save(mse_result, 
 	     file=paste0("/home/zwu56/sim/MSE_result",".RData"))
 	save(mae_result, 
