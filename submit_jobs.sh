@@ -1,15 +1,5 @@
 #!/bin/bash
 
-# Generic shell script for submitting many thousand short running jobs to a gridEngine
-# cluster. The script goes through 2 phases of a typical HPC pipeline: 1. Parallel 
-# execution, 2. merge of data. It assumes that you want to launch another script 
-# (e.g. using R) which is set in the SCRIPT variable below. The number of parallel
-# jobs run at each time is set through the max_jobs variable while the total jobs
-# is set through the total_jobs variable. The first batch of jobs are executed 
-# parallely while holding the second batch of jobs, when the first batch of jobs
-# are done, the second batch of jobs while be automatically executed. Note the 
-# total_jobs need to be divisible by max_jobs to ensure sequentially execuation. 
-
 # This script can take two arguments, SCRIPT and ANALYSIS.
 
 ##################### Change the constants as needed ##############################
@@ -19,7 +9,7 @@ myscratch="./scratch"  # location of your persistent scratch dir
 resultdir="./out"  # This is a folder in permanent storage
 script=$1      # your code as (R or Python) script (1st arg)
 max_jobs=400   # max number of jobs to run at a time
-total_jobs=3200 # needs to be divisible by max_jobs
+total_jobs=32000 # needs to be divisible by max_jobs
 ################### typically don't have to change anything below here ##############
 
 username=$(id -nu)
