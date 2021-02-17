@@ -5,7 +5,7 @@
 # 3) non-zero distribution 
 # 4) model complexity - with/without interaction 
 
-# Fixed: 10 variables (5 used, 5 non-used)
+# Predictors: 10 variables (5 used, 5 non-used)
 
 library(mgcv) # for generating tweedie distribution
 
@@ -49,28 +49,7 @@ createData <- function(n,zero,nonzero,linear,interaction){
       # zero proportion
       if (zero==0.05) {
         # probability of y=0
-        prob <- plogis(4.171 + w1 + w2 + w3 + w4 + w5 + w1*w2 + w1*w3 + w1*w4 + w1*w5 + 
-                         w2*w3 + w2*w4 + w2*w5 + w3*w4 + w3*w5 + w4*w5)
-        g <- rbinom(n,1,prob)
-        # assign g=0 costs
-        ind <- g==0
-        y[ind] <- 0
-        
-        # nonzero dist.
-        # assign g=1 costs
-        ind <- g==1
-        if (nonzero=="lognormal") { #log-normal
-          y[ind] <- exp(9 + main[ind] + rnorm(sum(ind),0,0.3))
-        } else if (nonzero=="gamma") { #gamma
-          y[ind] <- rgamma(sum(ind),shape = exp(9 + main[ind]), scale = 1.3)
-        } else if (nonzero=="tweedie") { #Tweedie
-          y[ind] <- rTweedie(exp(9 + main[ind]),p = 1.5,phi = 1.8)
-        } else if (nonzero=="mixture") { #mixture
-          y[ind] <- rlnormgammamix(sum(ind),0.5,shape=exp(9 + main[ind]),mu=9+main[ind])
-        }
-      } else if (zero==0.35) {
-        # probability of y=0
-        prob <- plogis(-1.708 + w1 + w2 + w3 + w4 + w5 + w1*w2 + w1*w3 + w1*w4 + w1*w5 + 
+        prob <- plogis(4.25 + w1 + w2 + w3 + w4 + w5 + w1*w2 + w1*w3 + w1*w4 + w1*w5 + 
                          w2*w3 + w2*w4 + w2*w5 + w3*w4 + w3*w5 + w4*w5)
         g <- rbinom(n,1,prob)
         # assign g=0 costs
@@ -91,8 +70,8 @@ createData <- function(n,zero,nonzero,linear,interaction){
         }
       } else if (zero==0.7){
         # probability of y=0
-        prob <- plogis(-9.4935 + w1 + w2 + w3 + w4 + w5 + w1*w2 + w1*w3 + w1*w4 + w1*w5 + 
-                         w2*w3 + w2*w4 + w2*w5 + w3*w4 + w3*w5 + w4*w5)
+        prob <- plogis(-1.65 + 0.1*(w1 + w2 + w3 + w4 + w5 + w1*w2 + w1*w3 + w1*w4 + w1*w5 + 
+                                      w2*w3 + w2*w4 + w2*w5 + w3*w4 + w3*w5 + w4*w5))
         g <- rbinom(n,1,prob)
         # assign g=0 costs
         ind <- g==0
@@ -122,27 +101,6 @@ createData <- function(n,zero,nonzero,linear,interaction){
       if (zero==0.05) {
         # probability of y=0
         prob <- plogis(27.432+ w1 + 2*w2 + 3*w3 + 0.5*w4 + 1.5*w5 + w1^2 - w2^2 + w3^2 - 
-                         w4^2 + w5^2 + w1*w2 - w1*w3 + w2*w4 - w3*w5 + w4*w5)
-        g <- rbinom(n,1,prob)
-        # assign g=0 costs
-        ind <- g==0
-        y[ind] <- 0
-        
-        # nonzero dist.
-        # assign g=1 costs
-        ind <- g==1
-        if (nonzero=="lognormal") { #log-normal
-          y[ind] <- exp(9 + main[ind] + rnorm(sum(ind),0,0.3))
-        } else if (nonzero=="gamma") { #gamma
-          y[ind] <- rgamma(sum(ind),shape = exp(9 + main[ind]), scale = 1.3)
-        } else if (nonzero=="tweedie") { #Tweedie
-          y[ind] <- rTweedie(exp(9 + main[ind]),p = 1.5,phi = 1.8)
-        } else if (nonzero=="mixture") { #mixture
-          y[ind] <- rlnormgammamix(sum(ind),0.5,shape=exp(9 + main[ind]),mu=9+main[ind])
-        }
-      } else if (zero==0.35) { 
-        # probability of y=0
-        prob <- plogis(1.385 + w1 + 2*w2 + 3*w3 + 0.5*w4 + 1.5*w5 + w1^2 - w2^2 + w3^2 - 
                          w4^2 + w5^2 + w1*w2 - w1*w3 + w2*w4 - w3*w5 + w4*w5)
         g <- rbinom(n,1,prob)
         # assign g=0 costs
@@ -194,27 +152,7 @@ createData <- function(n,zero,nonzero,linear,interaction){
       # zero proportion
       if (zero==0.05) {
         # probability of y=0
-        prob <- plogis(1.4595 + w1 + w2 + w3 + w4 + w5)
-        g <- rbinom(n,1,prob)
-        # assign g=0 costs
-        ind <- g==0
-        y[ind] <- 0
-        
-        # nonzero dist.
-        # assign g=1 costs
-        ind <- g==1
-        if (nonzero=="lognormal") { #log-normal
-          y[ind] <- exp(9 + main[ind] + rnorm(sum(ind),0,0.3))
-        } else if (nonzero=="gamma") { #gamma
-          y[ind] <- rgamma(sum(ind),shape = exp(9 + main[ind]), scale = 1.3)
-        } else if (nonzero=="tweedie") { #Tweedie
-          y[ind] <- rTweedie(exp(9 + main[ind]),p = 1.5,phi = 1.8)
-        } else if (nonzero=="mixture") { #mixture
-          y[ind] <- rlnormgammamix(sum(ind),0.5,shape=exp(9 + main[ind]),mu=9+main[ind])
-        }
-      } else if (zero==0.35) {
-        # probability of y=0
-        prob <- plogis(-2.145 + w1 + w2 + w3 + w4 + w5)
+        prob <- plogis(1.459 + w1 + w2 + w3 + w4 + w5)
         g <- rbinom(n,1,prob)
         # assign g=0 costs
         ind <- g==0
@@ -234,7 +172,7 @@ createData <- function(n,zero,nonzero,linear,interaction){
         }
       } else if (zero==0.7){
         # probability of y=0
-        prob <- plogis(-4.975 + w1 + w2 + w3 + w4 + w5)
+        prob <- plogis(-1.21 + 0.1*(w1 + w2 + w3 + w4 + w5))
         g <- rbinom(n,1,prob)
         # assign g=0 costs
         ind <- g==0
@@ -262,27 +200,6 @@ createData <- function(n,zero,nonzero,linear,interaction){
       if (zero==0.05) {
         # probability of y=0
         prob <- plogis(42.88 + w1 + 2*w2 + 0.8*w3 + 1.2*w4 + 0.5*w5 + 0.5*w1^2 - 
-                         0.5*w2^2 + 1.5*w3^2 - 1.5*w4^2 + w5^2)
-        g <- rbinom(n,1,prob)
-        # assign g=0 costs
-        ind <- g==0
-        y[ind] <- 0
-        
-        # nonzero dist.
-        # assign g=1 costs
-        ind <- g==1
-        if (nonzero=="lognormal") { #log-normal
-          y[ind] <- exp(9 + main[ind] + rnorm(sum(ind),0,0.3))
-        } else if (nonzero=="gamma") { #gamma
-          y[ind] <- rgamma(sum(ind),shape = exp(9 + main[ind]), scale = 1.3)
-        } else if (nonzero=="tweedie") { #Tweedie
-          y[ind] <- rTweedie(exp(9 + main[ind]),p = 1.5,phi = 1.8)
-        } else if (nonzero=="mixture") { #mixture
-          y[ind] <- rlnormgammamix(sum(ind),0.5,shape=exp(9 + main[ind]),mu=9+main[ind])
-        }
-      } else if (zero==0.35) {
-        # probability of y=0
-        prob <- plogis(2.517 + w1 + 2*w2 + 0.8*w3 + 1.2*w4 + 0.5*w5 + 0.5*w1^2 - 
                          0.5*w2^2 + 1.5*w3^2 - 1.5*w4^2 + w5^2)
         g <- rbinom(n,1,prob)
         # assign g=0 costs
