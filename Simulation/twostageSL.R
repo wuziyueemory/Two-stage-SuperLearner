@@ -1,10 +1,12 @@
-############################################
-Two-stage SuperLearner 
-############################################
+#############################################################
+## Two-stage SuperLearner 
+#############################################################
+# Load required packages
 library(SuperLearner)
-# two stage super-learner
-#################### With screening algorithm ################################################
-# function for generating weights (coefficients): scaled quadratic programming
+
+############################ Scaled quadratic programming ##################################
+## function for generating weights (coefficients): scaled quadratic programming
+
 method.CC_LS.scale <- function() {
   computeCoef = function(Z, Y, libraryNames, verbose,
                          obsWeights=rep(1, length(Y)),
