@@ -21,14 +21,3 @@ testing dataset `test.csv` which contains data from MEPS 2017, R script for MEPS
 data analysis `MEPS.R`, functions for two-stage super learner `twostageSL.R`, functions 
 for candidate estimators `Estimators.R` and shell script for executing MEPS data analysis 
 R scripts `submit_jobs.sh`.
-
-# Questions
-
-There is a substantial amount of code associated with this project and
-there was a significant amount of computational burden in executing the
-production size jobs. The code submitted along with the manuscript needs 
-to be modified in some places in order to ease its use on different systems. 
-I have not debugged the code across all different systems and I 
-cannot guarantee that the code will run error-free on new systems. If you come 
-across any issues, [please reach out to me by email](ziyue.wu@emory.edu) 
-and I am happy to help sort them out. 
