@@ -53,7 +53,6 @@ if(job_control == "run"){
     library(mgcv)
     library(quadprog)
     library(SuperLearner)
-    library(SuperLearner)
     library(earth)
     library(pscl) 
     library(VGAM) 
