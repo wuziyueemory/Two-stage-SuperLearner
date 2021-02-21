@@ -18,7 +18,7 @@ systems. To read more about this work flow see
 [this page](https://github.com/FredHutch/slurm-examples/tree/master/centipede). 
 
 This folder includes the script for simulations `simulation.R`, functions
-for two-stage super learner `twostageSL`, functions for candidate estimators `Estimators.R`
+for two-stage super learner `twostageSL.R`, functions for candidate estimators `Estimators.R`
 and shell script for executing simulation scripts `submit_jobs.sh`. The basic idea is that 
 in the bash script we first assign the maximum number of jobs to run 
 at a time (`"max_jobs"`) and the total number of jobs (`"total_jobs"`). Then we submit a 
@@ -26,7 +26,7 @@ job that computes how many loops of running will be needed.
 Next `simulation.R` submitted the first batch of jobs with argument `"run"`, which executes the
 number of jobs assigned in `"max_jobs"` parallelly. The `simulation.R` script source the 
 two-stage super learner function stored in `twostageSL` and candidate estimators stored 
-in `Estimators`. Then the `simulation.R`submitted the next batch of jobs holding, the next
+in `Estimators`. Then the `simulation.R` submitted the next batch of jobs holding, the next
 batch of jobs will be executed automatically when the previous batch of jobs are complete.
 Finally `simulation.R` is submitted with argument `"merge"`, 
 which merges the results of the individual jobs, formats the output and
@@ -40,5 +40,5 @@ production size jobs. The code submitted along with the manuscript needs
 to be modified in some places in order to ease its use on different systems. 
 I have not debugged the code across all different systems and I 
 cannot guarantee that the code will run error-free on new systems. If you come 
-across any issues, [please reach out to me by email](benkeser@emory.edu) 
+across any issues, [please reach out to me by email](ziyue.wu@emory.edu) 
 and I am happy to help sort them out. 
