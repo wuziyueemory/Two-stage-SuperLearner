@@ -17,9 +17,9 @@ systems. To read more about this work flow see
 [this page](https://github.com/FredHutch/slurm-examples/tree/master/centipede). 
 
 This folder includes the training dataset `train.csv` which contains data from BOLD (served
-as both training and validation through 10-fold cross-validation), 
+as both training and validation set through 10-fold cross-validation), 
 R script for BOLD data analysis `BOLD.R`, functions for two-stage super learner `twostageSL.R`, functions 
-for candidate estimators `Estimators.R` and shell script for executing MEPS data analysis 
+for candidate estimators `Estimators.R` and shell script for executing BOLD data analysis 
 R scripts `submit_jobs.sh`.
 
 # Questions
