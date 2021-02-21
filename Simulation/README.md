@@ -1,4 +1,4 @@
-__README for binary simulation code__
+__README for simulation code__
 
 # R package 
 
