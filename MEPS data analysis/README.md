@@ -17,10 +17,10 @@ systems. To read more about this work flow see
 [this page](https://github.com/FredHutch/slurm-examples/tree/master/centipede). 
 
 This folder includes the training dataset `train.csv` which contains data from MEPS 2016,
-testing dataset `test.csv` which contains data from MEPS 2017, the R script for MEPS 
+testing dataset `test.csv` which contains data from MEPS 2017, R script for MEPS 
 data analysis `MEPS.R`, functions for two-stage super learner `twostageSL.R`, functions 
 for candidate estimators `Estimators.R` and shell script for executing MEPS data analysis 
-R scripts `submit_jobs.sh`. 
+R scripts `submit_jobs.sh`.
 
 # Questions
 
