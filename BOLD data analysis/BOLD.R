@@ -31,7 +31,7 @@ source("/home/zwu56/BOLD/twostageSL.R")
 source("/home/zwu56/BOLD/Estimators.R")
 
 # load dataset
-train <- read.csv("/home/zwu56/BOLD/train.csv")
+train <- read.csv("/home/zwu56/BOLD/bold data.csv")
 
 
 ################################################################################################
